@@ -1,0 +1,24 @@
+# Web Scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.1.0
+
+# Data Management
+pandas>=2.2.0
+python-dateutil>=2.8.2
+
+# NLP and ML Libraries
+transformers>=4.40.0
+torch>=2.2.0
+scikit-learn>=1.4.0
+spacy>=3.7.0
+textblob>=0.18.0
+nltk>=3.8.1
+sentence-transformers>=2.5.0
+
+# Visualization (for reports)
+matplotlib>=3.8.0
+plotly>=5.19.0
+
+# Utilities
+tqdm>=4.66.0
