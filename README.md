@@ -1,8 +1,23 @@
-# Sri Lanka News Web Scraper and AI/NLP Analysis System
+# Sri Lanka News Risk Analyst Agent 🧠
 
-A Python-based web scraping and AI/NLP analysis system that automatically collects news headlines from Sri Lankan news websites and performs advanced text analysis including sentiment analysis, named entity recognition, topic modeling, and article clustering.
+An AI-powered risk analysis system that transforms news scraping into actionable intelligence. Built with the **ReAct (Reasoning + Acting)** pattern, this agent doesn't just collect news—it **thinks**, **analyzes**, and **recommends actions**.
 
-## Features
+Perfect for demonstrating AI agent development skills for roles in **risk intelligence, compliance, and security analysis** (e.g., Exiger, Deloitte Risk, etc.).
+
+## 🚀 What's New: From Scraper to AI Agent
+
+**Before**: Simple scraper that collected news → saved to CSV
+**Now**: Intelligent agent that follows: **Scrape → THINK → ANALYZE → ACT**
+
+### Key Features
+
+### 🧠 **AI Risk Analysis Agent**
+- **ReAct Pattern**: Agent reasons step-by-step (Thought → Action → Observation)
+- **15+ Risk Categories**: Political instability, corruption, cyber threats, economic crisis, etc.
+- **LLM Integration**: Uses GPT-4 for deep analysis (with keyword-based fallback)
+- **Intelligent Reasoning**: Shows complete thought process and decision-making
+- **Actionable Intelligence**: Recommends specific actions (escalate, monitor, investigate)
+- **Executive Summaries**: High-level risk landscape overview
 
 ### 🌐 **Web Scraping**
 - Scrapes news from 4 major Sri Lankan news websites:
@@ -28,6 +43,7 @@ A Python-based web scraping and AI/NLP analysis system that automatically collec
 - Python 3.8 or higher
 - 8GB RAM recommended for NLP features
 - (Optional) GPU for faster transformer models
+- (Optional) OpenAI API key for LLM-powered risk analysis
 
 ### Step 1: Clone or Download
 Download this project to your machine.
@@ -54,11 +70,48 @@ pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
 
+### Step 5: (Optional) Setup OpenAI for LLM Analysis
+```bash
+# Windows PowerShell
+$env:OPENAI_API_KEY="your-api-key-here"
+
+# Linux/Mac
+export OPENAI_API_KEY="your-api-key-here"
+```
+
 **Note**: Sentence-Transformer models (~400MB) will be downloaded automatically on first use.
 
 ## Usage
 
-### Quick Start - Run Everything
+### 🆕 Risk Analysis Agent (NEW!)
+
+#### Basic Risk Analysis (No API Key Required)
+```bash
+# Scrape news and run keyword-based risk analysis
+python main.py --scrape --risk
+```
+
+#### Advanced AI Risk Analysis (Requires OpenAI API)
+```bash
+# Use GPT-4 for deep reasoning and analysis
+python main.py --scrape --risk --use-llm
+```
+
+#### Run Everything (Recommended)
+```bash
+# Scrape, analyze, risk assessment, and report
+python main.py --all
+```
+
+#### Try the Example
+```bash
+# See the agent in action with sample data
+python example_agent_usage.py
+```
+
+### Traditional NLP Analysis
+
+#### Quick Start - Run Everything
 ```bash
 python main.py --all
 ```
@@ -66,7 +119,8 @@ python main.py --all
 This will:
 1. Scrape news from all websites
 2. Run NLP analysis (sentiment, entities, topics)
-3. Generate insights report
+3. **Run AI risk analysis with ReAct agent** 🆕
+4. Generate insights report
 
 ### Individual Commands
 
@@ -80,6 +134,11 @@ python main.py --scrape
 python main.py --analyze
 ```
 
+#### Risk Analysis Only
+```bash
+python main.py --risk --use-llm
+```
+
 #### Generate Report Only
 ```bash
 python main.py --report
@@ -90,6 +149,41 @@ python main.py --report
 python main.py --all --no-transformers
 ```
 
+## 📊 Output Examples
+
+### Risk Analysis Report
+```json
+{
+  "article_title": "Mass protests erupt over economic crisis",
+  "risk_level": "High",
+  "risk_categories": ["Civil Unrest", "Economic Crisis", "Political Instability"],
+  "confidence": 0.85,
+  "recommended_actions": [
+    "⚠️ MONITOR: Set up continuous monitoring",
+    "🔍 INVESTIGATE: Gather additional intelligence",
+    "📋 Document for compliance review"
+  ],
+  "reasoning_trace": [
+    {
+      "thought": "Analyzing article for risk indicators...",
+      "action": "ANALYZE_WITH_LLM",
+      "observation": "Found multiple high-severity risk factors"
+    }
+  ]
+}
+```
+
+### Executive Summary
+```
+🎯 RISK ANALYSIS SUMMARY
+Total Articles Analyzed: 45
+🚨 Risk Distribution:
+   Critical: 2  |  High: 8  |  Medium: 15  |  Low: 12
+🔝 Top Risk Categories:
+   Economic Crisis: 12  |  Political Instability: 9  |  Civil Unrest: 7
+⚠️ High Priority Articles: 10
+```
+
 ## Project Structure
 
 ```
@@ -97,6 +191,14 @@ News/
 ├── main.py                     # Main application entry point
 ├── config.py                   # Central configuration
 ├── requirements.txt            # Python dependencies
+├── AGENT_GUIDE.md             # 🆕 Beginner's guide to the agent
+├── example_agent_usage.py     # 🆕 Example agent usage
+│
+├── agent/                     # 🆕 AI Risk Analyst Agent
+│   ├── __init__.py
+│   ├── risk_agent.py          # Main agent with LLM integration
+│   ├── react_loop.py          # ReAct reasoning pattern
+│   └── risk_categories.py     # Risk types and assessment
 │
 ├── models/                     # Data models
 │   ├── __init__.py
@@ -129,7 +231,8 @@ News/
 │   └── news_articles.csv
 │
 └── reports/                    # Generated reports (created automatically)
-    └── latest_report.json
+    ├── latest_report.json
+    └── risk_analysis_report.json  # 🆕 AI risk analysis
 ```
 
 ## Configuration

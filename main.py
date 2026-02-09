@@ -1,9 +1,11 @@
 """
-Sri Lanka News Web Scraper and Topic Analysis System
-Main application entry point
+Sri Lanka News Web Scraper and Risk Analysis Agent
+Main application entry point with ReAct-based AI Agent
 """
 import argparse
 import logging
+import json
+import os
 from typing import List
 
 import config
@@ -12,6 +14,7 @@ from storage import DataManager
 from analysis import TopicAnalyzer
 from nlp import SentimentAnalyzer, EntityRecognizer, ArticleClusterer, InsightsGenerator
 from models import Article
+from agent import RiskAnalystAgent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -169,10 +172,123 @@ def generate_report(articles: List[Article] = None):
         print(f"  {source}: {count}")
     
 
+def risk_analysis(articles: List[Article] = None, use_llm: bool = False):
+    """
+    NEW: Run AI-powered risk analysis using ReAct agent
+    
+    This is the game-changer - transforms basic scraping into intelligent risk assessment
+    
+    Args:
+        articles: Articles to analyze (loads from CSV if not provided)
+        use_llm: Use OpenAI LLM for deep analysis (requires API key)
+    """
+    logger.info("🧠 Starting AI Risk Analysis with ReAct Agent...")
+    
+    # Load articles if not provided
+    if articles is None:
+        dm = DataManager()
+        articles = dm.load_from_csv()
+        
+        if not articles:
+            logger.error("No articles found to analyze")
+            return None
+    
+    # Initialize Risk Analyst Agent
+    agent = RiskAnalystAgent(
+        model="gpt-4-turbo-preview",  # or gpt-3.5-turbo for cheaper option
+        use_local_analysis=not use_llm  # Fallback to keyword-based if no LLM
+    )
+    
+    # Run analysis on all articles
+    logger.info(f"Agent analyzing {len(articles)} articles...")
+    risk_assessments = agent.analyze_batch(articles)
+    
+    # Generate summary report
+    summary = agent.generate_summary_report(risk_assessments)
+    
+    # Display results
+    print("\n" + "="*80)
+    print("🎯 RISK ANALYSIS SUMMARY")
+    print("="*80)
+    print(f"\n📊 Total Articles Analyzed: {summary['total_articles_analyzed']}")
+    print(f"\n🚨 Risk Distribution:")
+    for level, count in summary['risk_distribution'].items():
+        print(f"   {level}: {count}")
+    
+    print(f"\n🔝 Top Risk Categories:")
+    for category, count in summary['top_risk_categories']:
+        print(f"   {category}: {count} articles")
+    
+    print(f"\n⚠️ High Priority Articles: {summary['high_priority_count']}")
+    
+    if summary['high_priority_articles']:
+        print("\n🔴 HIGH PRIORITY ALERTS:")
+        for i, article in enumerate(summary['high_priority_articles'], 1):
+            print(f"\n   {i}. {article['article_title'][:60]}...")
+            print(f"      Risk Level: {article['risk_level']}")
+            print(f"      Categories: {', '.join(article['risk_categories'][:2])}")
+            print(f"      Actions: {article['recommended_actions'][0]}")
+    
+    print("\n" + "="*80 + "\n")
+    
+    # Save detailed report
+    risk_report_file = os.path.join(config.REPORTS_DIR, 'risk_analysis_report.json')
+    with open(risk_report_file, 'w', encoding='utf-8') as f:
+        json.dump({
+            'summary': summary,
+            'detailed_assessments': [a.to_dict() for a in risk_assessments]
+        }, f, indent=2, ensure_ascii=False)
+    
+    logger.info(f"📄 Detailed risk report saved to {risk_report_file}")
+    
+    return risk_assessments
+
+
+def generate_report(articles: List[Article] = None):
+    """Generate insights report"""
+    logger.info("Generating insights report...")
+    
+    # Load articles if not provided
+    if articles is None:
+        dm = DataManager()
+        articles = dm.load_from_csv()
+        
+        if not articles:
+            logger.error("No articles found for reporting")
+            return
+    
+    # Generate insights
+    insights_gen = InsightsGenerator()
+    
+    # Generate and display daily summary
+    summary = insights_gen.generate_daily_summary(articles)
+    print("\n" + "="*80)
+    print(summary)
+    print("="*80 + "\n")
+    
+    # Export comprehensive report
+    report_json = insights_gen.export_insights(articles, format="json")
+    
+    with open(config.JSON_REPORT_FILE, 'w', encoding='utf-8') as f:
+        f.write(report_json)
+    
+    logger.info(f"Report saved to {config.JSON_REPORT_FILE}")
+    
+    # Display statistics
+    dm = DataManager()
+    stats = dm.get_statistics()
+    
+    print("\nOverall Statistics:")
+    print(f"Total Articles: {stats['total']}")
+    print(f"\nArticles by Source:")
+    for source, count in stats.get('by_source', {}).items():
+        print(f"  {source}: {count}")
+    
+
 def main():
     """Main application entry point"""
     parser = argparse.ArgumentParser(
-        description="Sri Lanka News Web Scraper and AI/NLP Analysis System"
+        description="Sri Lanka News Risk Analysis Agent with ReAct AI"
     )
     parser.add_argument(
         '--scrape',
@@ -185,6 +301,16 @@ def main():
         help='Run NLP analysis on scraped articles'
     )
     parser.add_argument(
+        '--risk',
+        action='store_true',
+        help='Run AI risk analysis using ReAct agent (NEW!)'
+    )
+    parser.add_argument(
+        '--use-llm',
+        action='store_true',
+        help='Use OpenAI LLM for deep risk analysis (requires API key)'
+    )
+    parser.add_argument(
         '--report',
         action='store_true',
         help='Generate insights report'
@@ -192,7 +318,7 @@ def main():
     parser.add_argument(
         '--all',
         action='store_true',
-        help='Run scraping, analysis, and reporting'
+        help='Run scraping, analysis, risk assessment, and reporting'
     )
     parser.add_argument(
         '--no-transformers',
@@ -203,7 +329,7 @@ def main():
     args = parser.parse_args()
     
     # If no arguments, run all
-    if not any([args.scrape, args.analyze, args.report, args.all]):
+    if not any([args.scrape, args.analyze, args.risk, args.report, args.all]):
         args.all = True
     
     try:
@@ -215,6 +341,10 @@ def main():
         if args.all or args.analyze:
             use_transformers = not args.no_transformers
             articles = analyze_news(articles, use_transformers=use_transformers)
+        
+        # NEW: Risk Analysis with AI Agent
+        if args.all or args.risk:
+            risk_analysis(articles, use_llm=args.use_llm or args.all)
         
         if args.all or args.report:
             generate_report(articles)

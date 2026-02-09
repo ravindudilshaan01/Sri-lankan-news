@@ -16,6 +16,9 @@ textblob>=0.18.0
 nltk>=3.8.1
 sentence-transformers>=2.5.0
 
+# AI Agent & LLM Integration
+openai>=1.12.0
+
 # Visualization (for reports)
 matplotlib>=3.8.0
 plotly>=5.19.0
